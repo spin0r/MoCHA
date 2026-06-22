@@ -187,7 +187,7 @@ export function getSafeFileName(path: string): string {
 
   let targetStr = path;
   try {
-    const url = new URL(path);
+    const url = new URL(path, window.location.origin);
     const nestedUrl = url.searchParams.get("url") || url.searchParams.get("src");
     if (nestedUrl) {
       targetStr = nestedUrl;
@@ -197,9 +197,9 @@ export function getSafeFileName(path: string): string {
   }
 
   try {
-    const targetUrl = new URL(targetStr);
+    const targetUrl = new URL(targetStr, window.location.origin);
     let name = targetUrl.pathname.split("/").pop();
-    if (!name) {
+    if (!name || name === "proxy") {
       name = targetStr.split("/").pop()?.split("?")[0].split("#")[0] ?? '';
     }
     return decodeURIComponent(name) || "Untitled Video";

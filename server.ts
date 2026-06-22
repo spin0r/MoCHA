@@ -192,7 +192,6 @@ app.get('/proxy', async (req: Request, res: Response) => {
       'content-length',
       'content-range',
       'accept-ranges',
-      'content-disposition',
       'cache-control',
       'etag',
       'last-modified',
@@ -203,6 +202,23 @@ app.get('/proxy', async (req: Request, res: Response) => {
       if (value) {
         res.setHeader(header, value);
       }
+    }
+
+    // Ensure the browser knows the real filename for "Save Video As..."
+    let contentDisposition = response.headers.get('content-disposition');
+    if (!contentDisposition) {
+      try {
+        const urlObj = new URL(targetUrl);
+        let filename = urlObj.pathname.split('/').pop();
+        if (filename) {
+          filename = decodeURIComponent(filename).replace(/"/g, "'");
+          contentDisposition = `inline; filename="${filename}"`;
+        }
+      } catch (e) { /* ignore */ }
+    }
+    
+    if (contentDisposition) {
+      res.setHeader('Content-Disposition', contentDisposition);
     }
 
     // Ensure accept-ranges is always set for seeking
