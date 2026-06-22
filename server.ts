@@ -342,7 +342,7 @@ app.listen(PORT, () => {
 //  Pretty HTML log viewer
 // ──────────────────────────────────────────────
 function generateLogViewerHTML() {
-  return \`<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -615,5 +615,5 @@ function generateLogViewerHTML() {
     refreshInterval = setInterval(fetchLogs, 3000);
   </script>
 </body>
-</html>\`;
+</html>`;
 }
