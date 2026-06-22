@@ -290,7 +290,7 @@ app.options('/proxy', (_req: Request, res: Response) => {
 // ──────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'dist'), {
   maxAge: '1d',
-  setHeaders: (res, filePath) => {
+  setHeaders: (res: any, filePath: string) => {
     // Don't cache HTML — ensures SPA routing works
     if (filePath.endsWith('.html')) {
       res.setHeader('Cache-Control', 'no-cache');
@@ -300,7 +300,7 @@ app.use(express.static(path.join(__dirname, 'dist'), {
 
 // SPA fallback: serve index.html for any unmatched routes
 // (supports /?v=VIDEO_URL style deep links)
-app.get('*', (req: Request, res: Response, next: NextFunction) => {
+app.get(/.*/, (req: Request, res: Response, next: NextFunction) => {
   // Skip API routes
   if (req.path.startsWith('/api/') || req.path.startsWith('/proxy')) {
     next();
