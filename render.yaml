@@ -1,0 +1,17 @@
+# Render.com Blueprint — deploy with "render deploy" or connect repo
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: mocha-player
+    runtime: node
+    plan: free                  # Change to 'starter' for always-on
+    buildCommand: npm run render-build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+    # Auto-deploy on push to main
+    autoDeploy: true

@@ -1,0 +1,833 @@
+/* ── Entrance Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDownFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUpFadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+html,
+body,
+#dplayer {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: sans-serif;
+  background: #121212;
+  color: #e0e0e0;
+  overflow-x: hidden;
+}
+
+/* Entrance animation for the main player area */
+#dplayer {
+  animation: fadeIn 0.4s ease-out 0.1s both;
+}
+
+/* Home button */
+#homeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+#homeBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+#homeBtn:active {
+  transform: scale(0.95);
+}
+
+#homeBtn svg {
+  display: block;
+}
+
+#topBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 24px;
+  z-index: 10000;
+  transition: top 0.3s ease;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  background: rgba(30, 30, 40, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  justify-content: center;
+  /* Entrance: slide down */
+  animation: slideDownFadeIn 0.5s ease-out 0.05s both;
+}
+
+#topBar.hidden {
+  top: -100px;
+}
+
+input[type="text"],
+#topBar button,
+.file-input-label {
+  background: rgba(30, 30, 30, 0.85);
+  color: #e0e0e0;
+  border: 1px solid #333;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+input[type="text"] {
+  cursor: text;
+  flex: 1;
+  min-width: 200px;
+}
+
+.file-input-label:hover,
+#topBar button:hover {
+  background: #2a2a2a;
+}
+
+#speedSlider {
+  flex-grow: 1;
+  min-width: 120px;
+  max-width: 180px;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 6px;
+  height: 6px;
+  appearance: none;
+  accent-color: #888;
+  cursor: pointer;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+#speedLabel {
+  font-weight: bold;
+  min-width: 60px;
+  text-align: center;
+  color: #ffffff;
+}
+
+#speedOverlay {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: rgba(15, 15, 25, 0.6);
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(25px) saturate(1.5);
+  -webkit-backdrop-filter: blur(25px) saturate(1.5);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 9999;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: fit-content;
+  text-align: center;
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+  pointer-events: none;
+}
+
+#speedOverlay.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+#playerHideOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #181818;
+  z-index: 9998;
+  display: none;
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* Override critical CSS opacity:0 — these are toggled via display by JS */
+#shortcutModal,
+#historyModal,
+#confirmModal,
+#dragOverlay {
+  opacity: 1;
+}
+
+::placeholder {
+  color: #888;
+}
+
+#localFile {
+  display: none;
+}
+
+#infoBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 8px;
+  color: white;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+#infoBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+#infoBtn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}
+
+#shortcutModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px 30px;
+  border-radius: 16px;
+  background: rgba(15, 15, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(25px) saturate(1.5);
+  -webkit-backdrop-filter: blur(25px) saturate(1.5);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: #e0e0e0;
+  display: none;
+  z-index: 10001;
+  width: 90%;
+  max-width: 400px;
+  text-align: left;
+}
+
+#shortcutModal h3 {
+  margin-top: 0;
+  font-size: 20px;
+  color: #fff;
+}
+
+#shortcutModal ul {
+  padding-left: 20px;
+  margin-bottom: 20px;
+}
+
+#shortcutModal li {
+  margin: 6px 0;
+  color: #ddd;
+}
+
+.modal-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-version {
+  font-size: 12px;
+  color: #888;
+  font-family: monospace;
+}
+
+#shortcutModal button {
+  background: rgba(30, 30, 30, 0.85);
+  color: #fff;
+  border: 1px solid #444;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#shortcutModal button:hover {
+  background: #2a2a2a;
+}
+
+/* Placeholder message styling */
+.placeholder-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #121212;
+  color: #e0e0e0;
+  text-align: center;
+  padding: 20px;
+  /* Entrance: scale in */
+  animation: scaleIn 0.6s ease-out 0.15s both;
+}
+
+.placeholder-content h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #fff;
+  font-weight: 300;
+  /* Entrance: slide up */
+  animation: slideUpFadeIn 0.5s ease-out 0.25s both;
+}
+
+/* Subtle float on the DPlayer icon */
+@keyframes subtleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.placeholder-content h2 svg {
+  animation: subtleFloat 3s ease-in-out infinite;
+}
+
+.placeholder-content p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #ccc;
+  max-width: 500px;
+  line-height: 1.5;
+  /* Entrance: slide up, staggered */
+  animation: slideUpFadeIn 0.5s ease-out 0.35s both;
+}
+
+.placeholder-tips {
+  font-size: 0.9rem;
+  color: #888;
+  padding: 12px 20px;
+  background: rgba(30, 30, 30, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: inline-block;
+  /* Entrance: slide up, staggered */
+  animation: slideUpFadeIn 0.5s ease-out 0.45s both;
+}
+
+/* History Modal Styles - Matching shortcutModal design */
+#historyModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px 30px;
+  border-radius: 16px;
+  background: rgba(15, 15, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(25px) saturate(1.5);
+  -webkit-backdrop-filter: blur(25px) saturate(1.5);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: #e0e0e0;
+  display: none;
+  z-index: 10001;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  text-align: left;
+  overflow: hidden;
+}
+
+#historyModal h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #fff;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 20px;
+}
+
+.history-search {
+  flex: 1;
+  background: rgba(30, 30, 30, 0.85);
+  color: #e0e0e0;
+  border: 1px solid #333;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.clear-btn {
+  background: rgba(30, 30, 30, 0.85);
+  color: #fff;
+  border: 1px solid #444;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.clear-btn:hover {
+  background: #2a2a2a;
+}
+
+.history-list {
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.history-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.history-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-title {
+  font-weight: 500;
+  font-size: 15px;
+  margin-bottom: 6px;
+  color: #fff;
+  word-break: break-word;
+}
+
+.history-meta {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.history-type {
+  background: #444;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.history-time {
+  color: #ddd;
+  font-size: 13px;
+}
+
+.history-count {
+  background: #28a745;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.history-url {
+  color: #bbb;
+  font-size: 12px;
+  font-family: monospace;
+  word-break: break-all;
+  margin-top: 4px;
+  line-height: 1.3;
+  opacity: 0.8;
+}
+
+.history-actions {
+  margin-left: 15px;
+}
+
+.remove-btn {
+  background: rgba(30, 30, 30, 0.85);
+  color: #fff;
+  border: 1px solid #444;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.remove-btn:hover {
+  background: #2a2a2a;
+}
+
+.history-empty {
+  text-align: center;
+  color: #ddd;
+  padding: 40px 20px;
+  font-style: italic;
+  font-size: 16px;
+}
+
+/* History button styling */
+#historyBtn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#historyBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+#historyBtn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Scrollbar styling for history list */
+.history-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.history-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Close button styling to match shortcuts modal */
+#historyModal button {
+  background: rgba(30, 30, 30, 0.85);
+  color: #fff;
+  border: 1px solid #444;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#historyModal button:hover {
+  background: #2a2a2a;
+}
+
+/* Confirmation Modal Styles - Matching other modals */
+#confirmModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px 30px;
+  border-radius: 16px;
+  background: rgba(15, 15, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(25px) saturate(1.5);
+  -webkit-backdrop-filter: blur(25px) saturate(1.5);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: #e0e0e0;
+  display: none;
+  z-index: 10002;
+  width: 90%;
+  max-width: 400px;
+  text-align: left;
+}
+
+#confirmModal h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: #fff;
+}
+
+#confirmModal p {
+  margin-bottom: 20px;
+  line-height: 1.5;
+  color: #ddd;
+}
+
+#confirmModal .modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+#confirmModal button {
+  background: rgba(30, 30, 30, 0.85);
+  color: #fff;
+  border: 1px solid #444;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 14px;
+}
+
+#confirmModal button:hover {
+  background: #2a2a2a;
+}
+
+#confirmModal .clear-btn {
+  background: rgba(220, 53, 69, 0.8);
+  border-color: #dc3545;
+}
+
+#confirmModal .clear-btn:hover {
+  background: rgba(200, 35, 51, 0.9);
+}
+
+/* Responsive design for modals */
+@media (max-width: 768px) {
+  #historyModal,
+  #confirmModal {
+    width: 95%;
+    max-width: 95%;
+    padding: 15px 20px;
+  }
+
+  .modal-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .modal-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .history-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .history-actions {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+
+  .history-meta {
+    justify-content: flex-start;
+  }
+
+  #confirmModal .modal-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+/* Video progress tracking styles */
+.history-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.history-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #fff, #bbb);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.history-progress-text {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: monospace;
+}
+
+/* Dark theme support for progress */
+body.dark-theme .history-progress-bar,
+body[data-theme="dark"] .history-progress-bar {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .history-progress-fill,
+body[data-theme="dark"] .history-progress-fill {
+  background: linear-gradient(90deg, #fff, #bbb);
+}
+
+body.dark-theme .history-progress-text,
+body[data-theme="dark"] .history-progress-text {
+  color: #fff;
+}
+
+/* Drag and Drop Overlay */
+/* Drag and Drop Overlay */
+.drag-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 15, 0.4);
+  /* More subtle background */
+  z-index: 20000;
+  display: none;
+  /* Hidden by default */
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+  /* Allow events to pass through for detection */
+}
+
+/* Show when active class is added */
+.drag-overlay.active {
+  display: flex;
+}
+
+.drag-content {
+  text-align: center;
+  color: #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Thinner, cleaner border */
+  padding: 40px 60px;
+  border-radius: 16px;
+  /* Matches other modals */
+  background: rgba(30, 30, 40, 0.85);
+  /* Consistent background */
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: scale(0.95);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.drag-overlay.active .drag-content {
+  transform: scale(1);
+  border-color: #fff;
+  box-shadow:
+    0 12px 48px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.drag-content svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 24px;
+  stroke: #fff;
+  opacity: 0.9;
+}
+
+.drag-content h3 {
+  font-size: 20px;
+  margin: 0;
+  font-weight: 500;
+  color: #fff;
+}
+
+/* Subtitle input styling */
+.subtitle-label {
+  background: rgba(40, 40, 50, 0.85) !important;
+  border-color: #444 !important;
+  font-size: 13px !important;
+  padding: 6px 10px !important;
+}
+
+.subtitle-label:hover {
+  background: rgba(50, 50, 60, 0.85) !important;
+}
+
+#subtitleFile {
+  display: none;
+}
+
+#subtitleFileName {
+  font-size: 13px;
+  color: #bbb;
+}

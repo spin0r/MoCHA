@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <!-- Cache-Control removed to enable video caching for smooth playback -->
+    <title>DPlayer</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="alternate icon" href="favicon.ico" />
+
+    <!-- Critical CSS: everything visible on first paint, no flash -->
+    <style>
+      /* Base reset + dark background — instant, no flash */
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body, #dplayer { height: 100%; margin: 0; padding: 0; }
+      body {
+        font-family: sans-serif;
+        background: #121212;
+        color: #e0e0e0;
+        overflow-x: hidden;
+      }
+
+      /* Hide everything on load — module CSS will animate in */
+      #topBar, #dplayer, #speedOverlay, #playerHideOverlay,
+      #shortcutModal, #dragOverlay, #historyModal, #confirmModal {
+        opacity: 0;
+      }
+
+      /* TopBar critical layout so it doesn't reflow */
+      #topBar {
+        position: fixed; top: 0; left: 0; right: 0;
+        padding: 16px 24px; z-index: 10000;
+        display: flex; flex-wrap: wrap; align-items: center;
+        gap: 12px; justify-content: center;
+        background: rgba(30, 30, 40, 0.4);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+
+      /* Input + button base so they don't jump */
+      #topBar input[type="text"],
+      #topBar button, .file-input-label {
+        background: rgba(30, 30, 30, 0.85);
+        color: #e0e0e0; border: 1px solid #333;
+        padding: 8px 12px; border-radius: 6px;
+        font-size: 14px; cursor: pointer;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      #topBar input[type="text"] { flex: 1; min-width: 200px; cursor: text; }
+      #localFile, #subtitleFile { display: none; }
+      #speedSlider { min-width: 120px; max-width: 180px; height: 6px; appearance: none; }
+
+      /* Placeholder critical layout */
+      .placeholder-message {
+        display: flex; align-items: center; justify-content: center;
+        height: 100vh; background: #121212; color: #e0e0e0;
+        text-align: center; padding: 20px;
+      }
+      .placeholder-content h2 {
+        font-size: 2.5rem; margin-bottom: 1rem;
+        color: #fff; font-weight: 300;
+      }
+      .placeholder-content p {
+        font-size: 1.2rem; margin-bottom: 2rem;
+        color: #ccc; max-width: 500px; line-height: 1.5;
+      }
+      .placeholder-tips {
+        font-size: 0.9rem; color: #888; padding: 12px 20px;
+        background: rgba(30, 30, 30, 0.6); border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1); display: inline-block;
+      }
+
+      /* Overlay defaults */
+      #speedOverlay { display: none; }
+      #playerHideOverlay { display: none; }
+    </style>
+  </head>
+
+  <body>
+    <div id="topBar" class="controls">
+      <button id="homeBtn" title="Proxy &amp; Play" aria-label="Proxy &amp; Play">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="22" height="22">
+          <defs>
+            <linearGradient id="homeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1"/>
+              <stop offset="100%" style="stop-color:#2a2a2a;stop-opacity:1"/>
+            </linearGradient>
+            <linearGradient id="homePlay" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1"/>
+              <stop offset="100%" style="stop-color:#e0e0e0;stop-opacity:0.95"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="28" height="28" rx="7" ry="7" fill="url(#homeBg)" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
+          <path d="M11.5 8.5 L11.5 23.5 L23 16 Z" fill="url(#homePlay)" stroke="none"/>
+        </svg>
+      </button>
+      <input type="text" id="videoUrl" placeholder="Paste video URL" />
+      <label for="localFile" class="file-input-label">
+        <span id="fileName">Choose File</span>
+      </label>
+      <input type="file" id="localFile" accept="video/*" />
+
+      <label for="subtitleFile" class="file-input-label subtitle-label">
+        <span id="subtitleFileName">Subtitle (Optional)</span>
+      </label>
+      <input type="file" id="subtitleFile" accept=".srt,.vtt,.ass" />
+
+      <button id="loadBtn">Load</button>
+
+      <input
+        type="range"
+        id="speedSlider"
+        min="25"
+        max="200"
+        value="100"
+        step="1"
+      />
+      <div id="speedLabel">1.00x</div>
+      <button id="historyBtn" title="Video History" aria-label="Video History">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+          <path d="M12 7v5l4 2" />
+        </svg>
+      </button>
+      <button
+        id="infoBtn"
+        title="Keyboard Shortcuts"
+        aria-label="Keyboard Shortcuts"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12" y2="8" />
+        </svg>
+      </button>
+    </div>
+
+    <div id="dplayer">
+      <div id="placeholder" class="placeholder-message">
+        <div class="placeholder-content">
+          <h2>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 32 32"
+              width="48"
+              height="48"
+              style="vertical-align: middle; margin-right: 12px"
+            >
+              <defs>
+                <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop
+                    offset="0%"
+                    style="stop-color: #1a1a1a; stop-opacity: 1"
+                  />
+                  <stop
+                    offset="100%"
+                    style="stop-color: #2a2a2a; stop-opacity: 1"
+                  />
+                </linearGradient>
+                <linearGradient id="play" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop
+                    offset="0%"
+                    style="stop-color: #ffffff; stop-opacity: 1"
+                  />
+                  <stop
+                    offset="100%"
+                    style="stop-color: #e0e0e0; stop-opacity: 0.95"
+                  />
+                </linearGradient>
+                <linearGradient
+                  id="highlight"
+                  x1="0%"
+                  y1="0%"
+                  x2="0%"
+                  y2="100%"
+                >
+                  <stop
+                    offset="0%"
+                    style="stop-color: #ffffff; stop-opacity: 0.3"
+                  />
+                  <stop
+                    offset="100%"
+                    style="stop-color: #ffffff; stop-opacity: 0"
+                  />
+                </linearGradient>
+              </defs>
+              <rect
+                x="2"
+                y="2"
+                width="28"
+                height="28"
+                rx="7"
+                ry="7"
+                fill="url(#bg)"
+                stroke="rgba(255,255,255,0.2)"
+                stroke-width="0.5"
+              />
+              <path
+                d="M11.5 8.5 L11.5 23.5 L23 16 Z"
+                fill="url(#play)"
+                stroke="none"
+              />
+              <rect
+                x="2"
+                y="2"
+                width="28"
+                height="12"
+                rx="7"
+                ry="7"
+                fill="url(#highlight)"
+                opacity="0.4"
+              />
+              <circle cx="24" cy="8" r="2" fill="#666666" opacity="0.9" />
+            </svg>
+            DPlayer
+          </h2>
+          <p>
+            Paste a video URL, choose a local file, or press Ctrl+V to get
+            started
+          </p>
+          <div class="placeholder-tips">
+            <span>💡 Supports MP4, M3U8, and most video formats</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="speedOverlay"></div>
+    <div id="playerHideOverlay"></div>
+
+    <div id="shortcutModal">
+      <div class="modal-content">
+        <h3>🎹 Keyboard Shortcuts</h3>
+        <ul>
+          <li><b>H</b>: Open video history</li>
+          <li><b>B</b>: Hide/show player overlay</li>
+          <li><b>Ctrl+V</b>: Paste &amp; play URL</li>
+          <li><b>Ctrl+O</b>: Open file dialog</li>
+          <li><b>Ctrl+I</b>: Show this menu</li>
+          <li><b>Esc</b>: Close dialog boxes</li>
+        </ul>
+        <div class="modal-footer-row">
+          <span class="app-version"
+            >v3.2: feat: updated dplayer-enhanced to v1.0.2.</span
+          >
+          <button>Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="dragOverlay" class="drag-overlay">
+      <div class="drag-content">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        <h3>Drop Video or Link Here</h3>
+      </div>
+    </div>
+
+    <div id="historyModal">
+      <div class="modal-header">
+        <h3>📼 Video History</h3>
+        <input
+          type="text"
+          id="historySearch"
+          placeholder="Search history..."
+          class="history-search"
+        />
+      </div>
+      <div id="historyList" class="history-list">
+        <div class="history-empty">No videos played yet</div>
+      </div>
+      <div class="modal-actions">
+        <button>Close</button>
+        <button id="clearHistoryBtn" class="clear-btn">Clear All</button>
+      </div>
+    </div>
+
+    <div id="confirmModal">
+      <h3>⚠️ Confirm Action</h3>
+      <p id="confirmMessage">
+        Are you sure you want to clear all video history? This action cannot be
+        undone.
+      </p>
+      <div class="modal-actions">
+        <button id="confirmCancel">Cancel</button>
+        <button id="confirmOk" class="clear-btn">Clear All</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

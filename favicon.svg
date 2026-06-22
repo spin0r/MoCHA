@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2a2a2a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="play" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e0e0e0;stop-opacity:0.95" />
+    </linearGradient>
+    <linearGradient id="highlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background rounded rectangle -->
+  <rect x="2" y="2" width="28" height="28" rx="7" ry="7" fill="url(#bg)" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
+  
+  <!-- Play button triangle -->
+  <path d="M11.5 8.5 L11.5 23.5 L23 16 Z" fill="url(#play)" stroke="none"/>
+  
+  <!-- Subtle highlight -->
+  <rect x="2" y="2" width="28" height="12" rx="7" ry="7" fill="url(#highlight)" opacity="0.4"/>
+  
+  <!-- Small accent dot -->
+  <circle cx="24" cy="8" r="2" fill="#666666" opacity="0.9"/>
+</svg>

@@ -1,0 +1,6 @@
+node_modules
+dist
+dplayer-enhanced/
+*.local
+
+.vercel
