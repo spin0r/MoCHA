@@ -301,8 +301,12 @@ app.use(express.static(path.join(__dirname, 'dist'), {
 // SPA fallback: serve index.html for any unmatched routes
 // (supports /?v=VIDEO_URL style deep links)
 app.get(/.*/, (req: Request, res: Response, next: NextFunction) => {
-  // Skip API routes
-  if (req.path.startsWith('/api/') || req.path.startsWith('/proxy')) {
+  // Skip API routes and static file requests (e.g. /favicon.ico)
+  if (
+    req.path.startsWith('/api') || 
+    req.path.startsWith('/proxy') || 
+    req.path.match(/\.[a-z0-9]+$/i)
+  ) {
     next();
     return;
   }

@@ -15,6 +15,15 @@ export function loadVideoFromSource(
 ): void {
   if (!source) return;
 
+  // AUTOMATICALLY route all remote HTTP URLs through the Render server proxy
+  // if they are not already proxied and not a local blob file.
+  if (
+    (source.startsWith("http") || source.startsWith("//")) &&
+    !source.includes(PROXY_BASE)
+  ) {
+    source = PROXY_BASE + encodeURIComponent(source);
+  }
+
   // Hide modals when a new video is loaded
   const historyModal = document.getElementById("historyModal");
   const shortcutModal = document.getElementById("shortcutModal");
